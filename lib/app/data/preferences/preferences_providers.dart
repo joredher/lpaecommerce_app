@@ -3,27 +3,33 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 const _kHasCompletedOnboardingKey = 'has_completed_onboarding';
 
-final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
-  throw UnimplementedError('SharedPreferences must be overridden');
-});
-
 final onboardingStateProvider =
-    StateNotifierProvider<OnboardingStateNotifier, bool>((ref) {
-  final preferences = ref.watch(sharedPreferencesProvider);
-  final hasCompleted =
-      preferences.getBool(_kHasCompletedOnboardingKey) ?? false;
-  return OnboardingStateNotifier(preferences, hasCompleted);
-});
+    AsyncNotifierProvider<OnboardingStateNotifier, bool>(
+  OnboardingStateNotifier.new,
+);
 
-class OnboardingStateNotifier extends StateNotifier<bool> {
-  OnboardingStateNotifier(this._preferences, bool hasCompleted)
-      : super(hasCompleted);
+class OnboardingStateNotifier extends AsyncNotifier<bool> {
+  SharedPreferences? _preferences;
 
-  final SharedPreferences _preferences;
+  @override
+  Future<bool> build() async {
+    _preferences = await SharedPreferences.getInstance();
+    return _preferences!.getBool(_kHasCompletedOnboardingKey) ?? false;
+  }
 
   Future<void> completeOnboarding() async {
-    state = true;
-    await _preferences.setBool(_kHasCompletedOnboardingKey, true);
+    state = const AsyncLoading();
+    final result = await AsyncValue.guard(() async {
+      final prefs = _preferences ?? await SharedPreferences.getInstance();
+      _preferences = prefs;
+      await prefs.setBool(_kHasCompletedOnboardingKey, true);
+      return true;
+    });
+
+    state = result;
+    if (result.hasError) {
+      final stackTrace = result.stackTrace ?? StackTrace.current;
+      Error.throwWithStackTrace(result.error!, stackTrace);
+    }
   }
 }
-

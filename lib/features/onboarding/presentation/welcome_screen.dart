@@ -10,7 +10,32 @@ class WelcomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final onboardingState = ref.watch(onboardingStateProvider);
     final onboardingNotifier = ref.read(onboardingStateProvider.notifier);
+    final isProcessing = onboardingState.isLoading;
+
+    Future<void> completeAndNavigate(String routeName) async {
+      try {
+        await onboardingNotifier.completeOnboarding();
+        if (context.mounted) {
+          context.goNamed(routeName);
+        }
+      } catch (error, stackTrace) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: error,
+          stack: stackTrace,
+          library: 'onboarding',
+          context: ErrorDescription('while completing onboarding'),
+        ));
+        if (!context.mounted) {
+          return;
+        }
+        const message = 'No pudimos continuar. Intenta nuevamente.';
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text(message)),
+        );
+      }
+    }
 
     return Scaffold(
       body: Container(
@@ -53,6 +78,12 @@ class WelcomeScreen extends ConsumerWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 48),
+                  if (isProcessing) ...[
+                    const CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFB6E67B)),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
                   Wrap(
                     spacing: 16,
                     runSpacing: 12,
@@ -60,24 +91,28 @@ class WelcomeScreen extends ConsumerWidget {
                     children: [
                       _WelcomeButton(
                         label: 'LOG ON',
-                        onPressed: () async {
-                          await onboardingNotifier.completeOnboarding();
-                          if (context.mounted) {
-                            context.goNamed(AppRouteNames.profile);
-                          }
-                        },
+                        onPressed: isProcessing
+                            ? null
+                            : () => completeAndNavigate(AppRouteNames.profile),
                       ),
                       _WelcomeButton(
                         label: 'GO AHEAD',
-                        onPressed: () async {
-                          await onboardingNotifier.completeOnboarding();
-                          if (context.mounted) {
-                            context.goNamed(AppRouteNames.catalog);
-                          }
-                        },
+                        onPressed: isProcessing
+                            ? null
+                            : () => completeAndNavigate(AppRouteNames.catalog),
                       ),
                     ],
                   ),
+                  if (onboardingState.hasError) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      'Ocurrió un problema al guardar tu progreso.',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.white,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -105,8 +140,8 @@ class _WelcomeLogo extends StatelessWidget {
         child: Container(
           width: 96,
           height: 96,
-          decoration: BoxDecoration(
-            color: const Color(0xFF1F6A6A),
+          decoration: const BoxDecoration(
+            color: Color(0xFF1F6A6A),
             shape: BoxShape.circle,
           ),
           child: const Icon(
@@ -128,7 +163,7 @@ class _WelcomeButton extends StatelessWidget {
   });
 
   final String label;
-  final Future<void> Function() onPressed;
+  final Future<void> Function()? onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -144,9 +179,11 @@ class _WelcomeButton extends StatelessWidget {
           ),
           elevation: 6,
         ),
-        onPressed: () async {
-          await onPressed();
-        },
+        onPressed: onPressed == null
+            ? null
+            : () async {
+                await onPressed!.call();
+              },
         child: Text(
           label,
           style: const TextStyle(
@@ -158,4 +195,3 @@ class _WelcomeButton extends StatelessWidget {
     );
   }
 }
-

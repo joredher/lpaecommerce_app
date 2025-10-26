@@ -37,12 +37,12 @@ class AppRoutePaths {
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final appState = ref.watch(appStateProvider);
-  final hasCompletedOnboarding = ref.watch(onboardingStateProvider);
+  final onboardingState = ref.watch(onboardingStateProvider);
+  final hasCompletedOnboarding = onboardingState.asData?.value;
 
   return GoRouter(
     debugLogDiagnostics: true,
-    initialLocation:
-        hasCompletedOnboarding ? AppRoutePaths.home : AppRoutePaths.welcome,
+    initialLocation: AppRoutePaths.welcome,
     routes: <RouteBase>[
       GoRoute(
         name: AppRouteNames.welcome,
@@ -90,11 +90,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ],
     redirect: (context, state) {
       final isOnWelcomeRoute = state.uri.path == AppRoutePaths.welcome;
-      if (!hasCompletedOnboarding && !isOnWelcomeRoute) {
+
+      if (onboardingState.isLoading) {
+        return null;
+      }
+
+      final completedOnboarding = hasCompletedOnboarding ?? false;
+      if (!completedOnboarding && !isOnWelcomeRoute) {
         return AppRoutePaths.welcome;
       }
 
-      if (hasCompletedOnboarding && isOnWelcomeRoute) {
+      if (completedOnboarding && isOnWelcomeRoute) {
         return AppRoutePaths.home;
       }
 
