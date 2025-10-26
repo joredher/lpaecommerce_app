@@ -81,7 +81,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final requiresAuth = <String>{
         AppRoutePaths.checkout,
         AppRoutePaths.orders,
-        AppRoutePaths.profile,
       };
 
       final isLoggedIn = appState.authSession != null;
