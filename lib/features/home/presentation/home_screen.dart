@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import 'package:lpaecomms/app/routing/app_router.dart';
 import 'package:lpaecomms/app/state/app_state_provider.dart';
+import 'package:lpaecomms/features/catalog/data/catalog_models.dart';
+import 'package:lpaecomms/features/catalog/data/catalog_providers.dart';
 
 const _colorPrimary = Color(0xFF003459);
 const _colorPrimaryHover = Color(0xFFCAF0F8);
@@ -415,19 +417,15 @@ class _CategoryCard extends StatelessWidget {
   }
 }
 
+
 class _TrendingProducts extends ConsumerWidget {
   const _TrendingProducts();
-
-  static const _products = [
-    _ProductData('Smart Speaker Mini', 'demo-speaker'),
-    _ProductData('Noise Cancelling Headphones', 'demo-headphones'),
-    _ProductData('Wireless Keyboard', 'demo-keyboard'),
-  ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appState = ref.watch(appStateProvider);
     final cart = ref.read(appStateProvider.notifier);
+    final asyncProducts = ref.watch(trendingProductsProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -438,37 +436,75 @@ class _TrendingProducts extends ConsumerWidget {
           onAction: () => context.goNamed(AppRouteNames.catalog),
         ),
         const SizedBox(height: 12),
-        Column(
-          children: [
-            for (final product in _products)
-              Builder(
-                builder: (context) {
-                  final isInCart = appState.cartItems
-                      .any((item) => item.productId == product.sku);
-                  return Padding(
+        asyncProducts.when(
+          data: (products) {
+            if (products.isEmpty) {
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.85),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Text(
+                  'No featured products are available right now. Check back soon!',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: _colorSecondary,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+              );
+            }
+
+            return Column(
+              children: [
+                for (final product in products)
+                  Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: _TrendingProductTile(
-                      title: product.title,
-                      sku: product.sku,
-                      inCart: isInCart,
+                      product: product,
+                      inCart: appState.cartItems
+                          .any((item) => item.productId == product.id),
                       onTap: () => context.goNamed(
                         AppRouteNames.product,
-                        pathParameters: {'productId': product.sku},
+                        pathParameters: {'productId': product.id},
                       ),
                       onPrimaryAction: () {
+                        final isInCart = appState.cartItems
+                            .any((item) => item.productId == product.id);
                         if (isInCart) {
                           context.goNamed(AppRouteNames.cart);
                         } else {
                           cart.addToCart(
-                            CartItem(productId: product.sku, quantity: 1),
+                            CartItem(productId: product.id, quantity: 1),
                           );
                         }
                       },
                     ),
-                  );
-                },
-              ),
-          ],
+                  ),
+              ],
+            );
+          },
+          loading: () => const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: CircularProgressIndicator(),
+            ),
+          ),
+          error: (error, stackTrace) => Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.85),
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Text(
+              "We couldn't load featured products. ${error.toString()}",
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.red.shade600,
+                  ),
+            ),
+          ),
         ),
       ],
     );
@@ -477,15 +513,13 @@ class _TrendingProducts extends ConsumerWidget {
 
 class _TrendingProductTile extends StatelessWidget {
   const _TrendingProductTile({
-    required this.title,
-    required this.sku,
+    required this.product,
     required this.onTap,
     required this.onPrimaryAction,
     required this.inCart,
   });
 
-  final String title;
-  final String sku;
+  final Product product;
   final VoidCallback onTap;
   final VoidCallback onPrimaryAction;
   final bool inCart;
@@ -493,6 +527,53 @@ class _TrendingProductTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+
+    Widget buildThumbnail() {
+      final imageUrl = product.imageUrl;
+      if (imageUrl == null || imageUrl.isEmpty) {
+        return Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [
+                _colorGradientStart,
+                _colorGradientMid,
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: const Icon(
+            Icons.devices_other_outlined,
+            color: Colors.white,
+          ),
+        );
+      }
+
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Image.network(
+          imageUrl,
+          width: 56,
+          height: 56,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: _colorGradientStart.withOpacity(0.3)),
+              ),
+              child: const Icon(Icons.image_not_supported_outlined),
+            );
+          },
+        ),
+      );
+    }
 
     return Material(
       color: Colors.white.withOpacity(0.88),
@@ -504,32 +585,14 @@ class _TrendingProductTile extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [
-                      _colorGradientStart,
-                      _colorGradientMid,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Icon(
-                  Icons.devices_other_outlined,
-                  color: Colors.white,
-                ),
-              ),
+              buildThumbnail(),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
+                      product.name,
                       style: textTheme.titleMedium?.copyWith(
                         color: _colorSecondary,
                         fontWeight: FontWeight.w600,
@@ -537,9 +600,17 @@ class _TrendingProductTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'SKU: $sku',
+                      'SKU: ${product.slug.isEmpty ? product.id : product.slug}',
                       style: textTheme.bodySmall?.copyWith(
                         color: _colorSecondaryHover,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '\$${product.price.toStringAsFixed(2)}',
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: _colorPrimary,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
@@ -563,6 +634,7 @@ class _TrendingProductTile extends StatelessWidget {
     );
   }
 }
+
 
 class _SectionHeading extends StatelessWidget {
   const _SectionHeading({
@@ -657,9 +729,3 @@ class _CategoryData {
   final IconData icon;
 }
 
-class _ProductData {
-  const _ProductData(this.title, this.sku);
-
-  final String title;
-  final String sku;
-}
