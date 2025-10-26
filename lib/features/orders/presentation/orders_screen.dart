@@ -7,8 +7,20 @@ class OrdersScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Orders')),
-      body: const Center(
-        child: Text('Track recent and past orders.'),
+      body: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: 3,
+        itemBuilder: (context, index) {
+          final orderNumber = '#10${index + 1}45';
+          return Card(
+            child: ListTile(
+              leading: const Icon(Icons.receipt_long_outlined),
+              title: Text('Order $orderNumber'),
+              subtitle: const Text('Placeholder order summary'),
+              trailing: const Icon(Icons.chevron_right),
+            ),
+          );
+        },
       ),
     );
   }
