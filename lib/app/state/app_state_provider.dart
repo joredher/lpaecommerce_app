@@ -7,10 +7,14 @@ class AuthSession {
   const AuthSession({
     required this.userId,
     required this.email,
+    this.displayName,
+    this.token,
   });
 
   final String userId;
   final String email;
+  final String? displayName;
+  final String? token;
 }
 
 /// Lightweight representation of an item that appears in the shopper's cart.
