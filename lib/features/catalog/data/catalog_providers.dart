@@ -1,12 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/data/mysql/mysql_providers.dart';
 import 'catalog_models.dart';
 import 'catalog_repository.dart';
 
 final catalogRepositoryProvider = Provider<CatalogRepository>((ref) {
-  final database = ref.watch(mySqlDatabaseProvider);
-  return CatalogRepository(database: database);
+  return const CatalogRepository();
 });
 
 final catalogCategoriesProvider = FutureProvider.autoDispose<List<Category>>((ref) async {
