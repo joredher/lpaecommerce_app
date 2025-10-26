@@ -12,15 +12,16 @@ final onboardingStateProvider =
 
 class OnboardingStateNotifier extends AsyncNotifier<bool> {
   SharedPreferences? _preferences;
+  bool _useFallback = false;
+  bool _fallbackValue = false;
 
-  Future<SharedPreferences> _ensurePreferences() async {
-    if (_preferences != null) {
-      return _preferences!;
+  Future<void> _ensurePreferencesLoaded() async {
+    if (_preferences != null || _useFallback) {
+      return;
     }
 
     try {
       _preferences = await SharedPreferences.getInstance();
-      return _preferences!;
     } on MissingPluginException catch (error, stackTrace) {
       FlutterError.reportError(FlutterErrorDetails(
         exception: error,
@@ -31,23 +32,38 @@ class OnboardingStateNotifier extends AsyncNotifier<bool> {
         ),
       ));
 
-      SharedPreferences.setMockInitialValues(const <String, Object?>{});
-      _preferences = await SharedPreferences.getInstance();
-      return _preferences!;
+      _useFallback = true;
+      _fallbackValue = false;
     }
   }
 
   @override
   Future<bool> build() async {
-    final prefs = await _ensurePreferences();
+    await _ensurePreferencesLoaded();
+
+    if (_useFallback) {
+      return _fallbackValue;
+    }
+
+    final prefs = _preferences!;
     return prefs.getBool(_kHasCompletedOnboardingKey) ?? false;
   }
 
   Future<void> completeOnboarding() async {
     state = const AsyncLoading();
     final result = await AsyncValue.guard(() async {
-      final prefs = await _ensurePreferences();
-      await prefs.setBool(_kHasCompletedOnboardingKey, true);
+      await _ensurePreferencesLoaded();
+
+      if (_useFallback) {
+        _fallbackValue = true;
+        return true;
+      }
+
+      final prefs = _preferences!;
+      final didPersist = await prefs.setBool(_kHasCompletedOnboardingKey, true);
+      if (!didPersist) {
+        throw StateError('Failed to persist onboarding completion flag');
+      }
       return true;
     });
 
