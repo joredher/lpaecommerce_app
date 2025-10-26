@@ -38,12 +38,12 @@ class HomeScreen extends ConsumerWidget {
           _BadgeIconButton(
             count: cartCount,
             icon: Icons.shopping_cart_outlined,
-            onTap: () => context.goNamed(AppRouteNames.cart),
+            onTap: () => context.pushNamed(AppRouteNames.cart),
             tooltip: 'Cart',
           ),
           IconButton(
             icon: const Icon(Icons.person_outline),
-            onPressed: () => context.goNamed(AppRouteNames.profile),
+            onPressed: () => context.pushNamed(AppRouteNames.profile),
             tooltip: isAuthenticated ? 'Account' : 'Sign in',
           ),
         ],
@@ -182,7 +182,7 @@ class _HeroCTAButton extends StatelessWidget {
           ),
           elevation: 0,
         ),
-        onPressed: () => context.goNamed(routeName),
+        onPressed: () => context.pushNamed(routeName),
         child: Text(
           label,
           style: const TextStyle(fontWeight: FontWeight.w600),
@@ -205,14 +205,14 @@ class _QuickActionGrid extends StatelessWidget {
         icon: Icons.grid_view_rounded,
         description: 'Browse everything in-store',
         color: _colorPrimary,
-        onTap: () => context.goNamed(AppRouteNames.catalog),
+        onTap: () => context.pushNamed(AppRouteNames.catalog),
       ),
       _QuickAction(
         title: 'Categories',
         icon: Icons.dashboard_customize_outlined,
         description: 'Jump to curated collections',
         color: _colorSecondary,
-        onTap: () => context.goNamed(AppRouteNames.catalog),
+        onTap: () => context.pushNamed(AppRouteNames.catalog),
       ),
       _QuickAction(
         title: 'My Cart',
@@ -220,14 +220,14 @@ class _QuickActionGrid extends StatelessWidget {
         badge: cartCount > 0 ? '$cartCount' : null,
         description: 'Review items before checkout',
         color: _colorCTA,
-        onTap: () => context.goNamed(AppRouteNames.cart),
+        onTap: () => context.pushNamed(AppRouteNames.cart),
       ),
       _QuickAction(
         title: 'Account',
         icon: Icons.person_outline,
         description: 'Profile, addresses & more',
         color: _colorSuccess,
-        onTap: () => context.goNamed(AppRouteNames.profile),
+        onTap: () => context.pushNamed(AppRouteNames.profile),
       ),
     ];
 
@@ -347,7 +347,7 @@ class _FeaturedCategories extends StatelessWidget {
         _SectionHeading(
           title: 'Featured categories',
           actionLabel: 'See all',
-          onAction: () => context.goNamed(AppRouteNames.catalog),
+          onAction: () => context.pushNamed(AppRouteNames.catalog),
         ),
         const SizedBox(height: 12),
         SizedBox(
@@ -385,7 +385,7 @@ class _CategoryCard extends StatelessWidget {
         color: Colors.white.withOpacity(0.85),
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
-          onTap: () => context.goNamed(AppRouteNames.catalog),
+          onTap: () => context.pushNamed(AppRouteNames.catalog),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -433,7 +433,7 @@ class _TrendingProducts extends ConsumerWidget {
         _SectionHeading(
           title: 'Trending for you',
           actionLabel: 'View catalog',
-          onAction: () => context.goNamed(AppRouteNames.catalog),
+          onAction: () => context.pushNamed(AppRouteNames.catalog),
         ),
         const SizedBox(height: 12),
         asyncProducts.when(
@@ -465,7 +465,7 @@ class _TrendingProducts extends ConsumerWidget {
                       product: product,
                       inCart: appState.cartItems
                           .any((item) => item.productId == product.id),
-                      onTap: () => context.goNamed(
+                      onTap: () => context.pushNamed(
                         AppRouteNames.product,
                         pathParameters: {'productId': product.id},
                       ),
@@ -473,7 +473,7 @@ class _TrendingProducts extends ConsumerWidget {
                         final isInCart = appState.cartItems
                             .any((item) => item.productId == product.id);
                         if (isInCart) {
-                          context.goNamed(AppRouteNames.cart);
+                          context.pushNamed(AppRouteNames.cart);
                         } else {
                           cart.addToCart(
                             CartItem(productId: product.id, quantity: 1),

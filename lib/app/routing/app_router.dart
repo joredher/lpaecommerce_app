@@ -35,7 +35,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final appState = ref.watch(appStateProvider);
 
   return GoRouter(
-    debugLogDiagnostics: true,
     initialLocation: AppRoutePaths.home,
     routes: <RouteBase>[
       GoRoute(

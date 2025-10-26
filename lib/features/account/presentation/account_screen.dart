@@ -68,12 +68,12 @@ class AccountScreen extends ConsumerWidget {
                                         email: 'shopper@example.com',
                                       ),
                                     ),
-                                onContinue: () => context.goNamed(AppRouteNames.home),
+                                onContinue: () => context.pop(),
                               )
                             : _LoggedInContent(
                                 key: const ValueKey('logged-in'),
                                 email: authSession.email,
-                                onViewOrders: () => context.goNamed(AppRouteNames.orders),
+                                onViewOrders: () => context.pushNamed(AppRouteNames.orders),
                                 onSignOut: () => ref.read(appStateProvider.notifier).signOut(),
                               ),
                       ),

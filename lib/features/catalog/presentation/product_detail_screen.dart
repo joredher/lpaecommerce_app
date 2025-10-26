@@ -129,7 +129,7 @@ class ProductDetailScreen extends ConsumerWidget {
                   child: ElevatedButton.icon(
                     onPressed: () {
                       if (isInCart) {
-                        context.goNamed(AppRouteNames.cart);
+                        context.pushNamed(AppRouteNames.cart);
                       } else {
                         cartNotifier.addToCart(CartItem(productId: product.id));
                         ScaffoldMessenger.of(context).showSnackBar(

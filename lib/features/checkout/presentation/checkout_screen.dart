@@ -39,7 +39,7 @@ class CheckoutScreen extends ConsumerWidget {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Order placed!')),
                         );
-                        context.goNamed(AppRouteNames.orders);
+                        context.pushNamed(AppRouteNames.orders);
                       },
                 child: const Text('Place order'),
               ),

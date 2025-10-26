@@ -44,7 +44,7 @@ class CartScreen extends ConsumerWidget {
         child: ElevatedButton(
           onPressed: items.isEmpty
               ? null
-              : () => context.goNamed(AppRouteNames.checkout),
+              : () => context.pushNamed(AppRouteNames.checkout),
           child: const Text('Proceed to checkout'),
         ),
       ),

@@ -42,7 +42,7 @@ class CatalogScreen extends ConsumerWidget {
                         ),
                   ),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context.goNamed(
+                  onTap: () => context.pushNamed(
                     AppRouteNames.product,
                     pathParameters: {'productId': product.id},
                   ),
