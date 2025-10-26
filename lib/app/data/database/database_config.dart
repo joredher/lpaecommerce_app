@@ -53,8 +53,8 @@ class DatabaseConfig {
 const DatabaseConfig defaultDatabaseConfig = DatabaseConfig(
   host: '127.0.0.1',
   port: 3306,
-  user: 'lpa_user',
-  password: 'change_me',
+  user: 'root',
+  password: 'ingenieroDEV14',
   databaseName: 'lpaecommerce',
   directConnectionEnabled: false,
 );
