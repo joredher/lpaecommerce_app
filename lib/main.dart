@@ -1,42 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void main() => runApp(const MyApp());
+import 'app/app_root.dart';
+import 'app/state/app_state_provider.dart';
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
 
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(debugShowCheckedModeBanner: false,
-      home: Lpage()
-    );
-  }
-}
+  final container = ProviderContainer();
+  // Touch the app state notifier to ensure eager initialization before runApp.
+  container.read(appStateProvider.notifier);
 
-class Lpage extends StatelessWidget {
-  const Lpage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('LPAEcommerce'),
-        titleTextStyle: TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
-        backgroundColor: Colors.blue,
-      ),
-      body: Container(
-        color: Colors.white,
-        child: Center(
-          child: Text(
-            'Welcome to LPAEcommerce!',
-            style: TextStyle(fontSize: 24, color: Colors.black),
-          ),
-        ),
-      ),
-    );
-  }
+  runApp(
+    UncontrolledProviderScope(
+      container: container,
+      child: const AppRoot(),
+    ),
+  );
 }
