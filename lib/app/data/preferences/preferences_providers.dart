@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,17 +13,40 @@ final onboardingStateProvider =
 class OnboardingStateNotifier extends AsyncNotifier<bool> {
   SharedPreferences? _preferences;
 
+  Future<SharedPreferences> _ensurePreferences() async {
+    if (_preferences != null) {
+      return _preferences!;
+    }
+
+    try {
+      _preferences = await SharedPreferences.getInstance();
+      return _preferences!;
+    } on MissingPluginException catch (error, stackTrace) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: error,
+        stack: stackTrace,
+        library: 'preferences',
+        context: ErrorDescription(
+          'while obtaining shared preferences for onboarding state',
+        ),
+      ));
+
+      SharedPreferences.setMockInitialValues(const <String, Object?>{});
+      _preferences = await SharedPreferences.getInstance();
+      return _preferences!;
+    }
+  }
+
   @override
   Future<bool> build() async {
-    _preferences = await SharedPreferences.getInstance();
-    return _preferences!.getBool(_kHasCompletedOnboardingKey) ?? false;
+    final prefs = await _ensurePreferences();
+    return prefs.getBool(_kHasCompletedOnboardingKey) ?? false;
   }
 
   Future<void> completeOnboarding() async {
     state = const AsyncLoading();
     final result = await AsyncValue.guard(() async {
-      final prefs = _preferences ?? await SharedPreferences.getInstance();
-      _preferences = prefs;
+      final prefs = await _ensurePreferences();
       await prefs.setBool(_kHasCompletedOnboardingKey, true);
       return true;
     });
