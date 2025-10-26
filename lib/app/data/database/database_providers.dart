@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mysql1/mysql1.dart';
+import 'package:mysql_client/mysql_client.dart';
 
 import 'database_config.dart';
 import 'database_service.dart';
@@ -24,10 +24,10 @@ final databaseServiceProvider = Provider<DatabaseService>((ref) {
   return service;
 });
 
-/// Exposes the underlying [MySqlConnection] to Riverpod consumers. The
+/// Exposes the underlying [MySQLConnection] to Riverpod consumers. The
 /// provider delegates the heavy lifting to [DatabaseService], which ensures
 /// the connection is created once and torn down correctly.
-final databaseConnectionProvider = FutureProvider<MySqlConnection>((ref) async {
+final databaseConnectionProvider = FutureProvider<MySQLConnection>((ref) async {
   final service = ref.watch(databaseServiceProvider);
   final connection = await service.openConnection();
 
