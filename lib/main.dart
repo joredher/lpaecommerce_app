@@ -30,22 +30,10 @@ class _AppBootstrap extends ConsumerStatefulWidget {
 }
 
 class _AppBootstrapState extends ConsumerState<_AppBootstrap> {
-  ProviderSubscription<AsyncValue<MySQLConnection>>?
-      _databaseConnectionSubscription;
-
   @override
   void initState() {
     super.initState();
     unawaited(_initialize());
-  }
-
-  @override
-  void dispose() {
-    final subscription = _databaseConnectionSubscription;
-    if (subscription != null) {
-      unawaited(subscription.close());
-    }
-    super.dispose();
   }
 
   Future<void> _initialize() async {
@@ -56,7 +44,7 @@ class _AppBootstrapState extends ConsumerState<_AppBootstrap> {
       return;
     }
 
-    _databaseConnectionSubscription = ref.listenManual<AsyncValue<MySQLConnection>>(
+    ref.listen<AsyncValue<MySQLConnection>>(
       databaseConnectionProvider,
       (_, __) {},
     );
