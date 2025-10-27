@@ -93,7 +93,7 @@ class _HeroSection extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
+        color: Colors.white.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
@@ -263,7 +263,7 @@ class _QuickAction extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Material(
-      color: Colors.white.withOpacity(0.85),
+      color: Colors.white.withValues(alpha: 0.85),
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
@@ -279,7 +279,7 @@ class _QuickAction extends StatelessWidget {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
+                      color: color.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Icon(icon, color: color),
@@ -380,7 +380,7 @@ class _CategoryCard extends StatelessWidget {
       width: 160,
       child: Material(
         borderRadius: BorderRadius.circular(20),
-        color: Colors.white.withOpacity(0.85),
+        color: Colors.white.withValues(alpha: 0.85),
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
           onTap: () => context.goNamed(AppRouteNames.catalog),
@@ -393,7 +393,7 @@ class _CategoryCard extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: _colorPrimary.withOpacity(0.1),
+                    color: _colorPrimary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(icon, color: _colorPrimary),
@@ -495,7 +495,7 @@ class _TrendingProductTile extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Material(
-      color: Colors.white.withOpacity(0.88),
+      color: Colors.white.withValues(alpha: 0.88),
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),

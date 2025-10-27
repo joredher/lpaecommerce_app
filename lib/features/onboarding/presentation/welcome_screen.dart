@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -125,7 +124,7 @@ class WelcomeScreen extends ConsumerWidget {
 }
 
 class _WelcomeLogo extends StatelessWidget {
-  const _WelcomeLogo({super.key});
+  const _WelcomeLogo();
 
   @override
   Widget build(BuildContext context) {
@@ -133,9 +132,12 @@ class _WelcomeLogo extends StatelessWidget {
       width: 140,
       height: 140,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.12),
+        color: Colors.white.withValues(alpha: 0.12),
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white.withOpacity(0.4), width: 2),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.4),
+          width: 2,
+        ),
       ),
       child: Center(
         child: Container(
@@ -160,7 +162,6 @@ class _WelcomeButton extends StatelessWidget {
   const _WelcomeButton({
     required this.label,
     required this.onPressed,
-    super.key,
   });
 
   final String label;

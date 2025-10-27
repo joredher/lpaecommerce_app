@@ -21,7 +21,7 @@ Future<void> main() async {
 }
 
 class _AppBootstrap extends ConsumerStatefulWidget {
-  const _AppBootstrap({required this.child, super.key});
+  const _AppBootstrap({required this.child});
 
   final Widget child;
 
@@ -56,7 +56,7 @@ class _AppBootstrapState extends ConsumerState<_AppBootstrap> {
       return;
     }
 
-    _databaseConnectionSubscription = ref.listen<AsyncValue<MySQLConnection>>(
+    _databaseConnectionSubscription = ref.listenManual<AsyncValue<MySQLConnection>>(
       databaseConnectionProvider,
       (_, __) {},
     );
