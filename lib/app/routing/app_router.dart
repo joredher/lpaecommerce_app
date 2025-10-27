@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -9,9 +8,12 @@ import '../../features/catalog/presentation/product_detail_screen.dart';
 import '../../features/checkout/presentation/checkout_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/orders/presentation/orders_screen.dart';
+import '../../features/onboarding/presentation/welcome_screen.dart';
+import '../data/preferences/preferences_providers.dart';
 import '../state/app_state_provider.dart';
 
 class AppRouteNames {
+  static const welcome = 'welcome';
   static const home = 'home';
   static const catalog = 'catalog';
   static const product = 'product';
@@ -22,6 +24,7 @@ class AppRouteNames {
 }
 
 class AppRoutePaths {
+  static const welcome = '/welcome';
   static const home = '/';
   static const catalog = '/catalog';
   static const product = '/product/:productId';
@@ -33,11 +36,18 @@ class AppRoutePaths {
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final appState = ref.watch(appStateProvider);
+  final onboardingState = ref.watch(onboardingStateProvider);
+  final hasCompletedOnboarding = onboardingState.asData?.value;
 
   return GoRouter(
     debugLogDiagnostics: true,
-    initialLocation: AppRoutePaths.home,
+    initialLocation: AppRoutePaths.welcome,
     routes: <RouteBase>[
+      GoRoute(
+        name: AppRouteNames.welcome,
+        path: AppRoutePaths.welcome,
+        builder: (context, state) => const WelcomeScreen(),
+      ),
       GoRoute(
         name: AppRouteNames.home,
         path: AppRoutePaths.home,
@@ -78,10 +88,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
     ],
     redirect: (context, state) {
+      final isOnWelcomeRoute = state.uri.path == AppRoutePaths.welcome;
+
+      if (onboardingState.isLoading) {
+        return null;
+      }
+
+      final completedOnboarding = hasCompletedOnboarding ?? false;
+      if (!completedOnboarding && !isOnWelcomeRoute) {
+        return AppRoutePaths.welcome;
+      }
+
+      if (completedOnboarding && isOnWelcomeRoute) {
+        return AppRoutePaths.home;
+      }
+
       final requiresAuth = <String>{
         AppRoutePaths.checkout,
         AppRoutePaths.orders,
-        AppRoutePaths.profile,
       };
 
       final isLoggedIn = appState.authSession != null;

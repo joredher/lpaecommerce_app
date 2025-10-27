@@ -37,6 +37,7 @@ dependencies:
   go_router: ^14.2.3
   flutter_riverpod: ^2.5.1
   mysql_client: ^0.0.27
+  shared_preferences: ^2.3.2
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mysql_client/mysql_client.dart';
 
 import 'app/app_root.dart';
 import 'app/data/database/database_providers.dart';
@@ -8,37 +11,60 @@ import 'app/state/app_state_provider.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final container = ProviderContainer();
-  // Touch the app state notifier to ensure eager initialization before runApp.
-  container.read(appStateProvider.notifier);
+  runApp(
+    const ProviderScope(
+      child: _AppBootstrap(
+        child: AppRoot(),
+      ),
+    ),
+  );
+}
 
-  final databaseConfig = container.read(databaseConfigProvider);
-  if (databaseConfig.directConnectionEnabled) {
-    // Warm up the database connection before rendering the UI. This allows us
-    // to surface connection issues early in the startup sequence.
-    // ignore: unused_result
-    container.listen(
+class _AppBootstrap extends ConsumerStatefulWidget {
+  const _AppBootstrap({required this.child});
+
+  final Widget child;
+
+  @override
+  ConsumerState<_AppBootstrap> createState() => _AppBootstrapState();
+}
+
+class _AppBootstrapState extends ConsumerState<_AppBootstrap> {
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_initialize());
+  }
+
+  Future<void> _initialize() async {
+    ref.read(appStateProvider.notifier);
+
+    final databaseConfig = ref.read(databaseConfigProvider);
+    if (!databaseConfig.directConnectionEnabled) {
+      return;
+    }
+
+    ref.listen<AsyncValue<MySQLConnection>>(
       databaseConnectionProvider,
       (_, __) {},
     );
 
     try {
-      await container.read(databaseConnectionProvider.future);
+      await ref.read(databaseConnectionProvider.future);
     } catch (error, stackTrace) {
       FlutterError.reportError(FlutterErrorDetails(
         exception: error,
         stack: stackTrace,
         library: 'database',
-        context:
-            ErrorDescription('while establishing the initial database connection'),
+        context: ErrorDescription(
+          'while establishing the initial database connection',
+        ),
       ));
     }
   }
 
-  runApp(
-    UncontrolledProviderScope(
-      container: container,
-      child: const AppRoot(),
-    ),
-  );
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
 }
