@@ -14,14 +14,6 @@ Future<void> main() async {
 
   final databaseConfig = container.read(databaseConfigProvider);
   if (databaseConfig.directConnectionEnabled) {
-    // Warm up the database connection before rendering the UI. This allows us
-    // to surface connection issues early in the startup sequence.
-    // ignore: unused_result
-    container.listen(
-      databaseConnectionProvider,
-      (_, __) {},
-    );
-
     try {
       await container.read(databaseConnectionProvider.future);
     } catch (error, stackTrace) {

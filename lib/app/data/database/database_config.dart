@@ -51,10 +51,12 @@ class DatabaseConfig {
 /// [directConnectionEnabled] to `true` only on trusted machines where a direct
 /// database connection is acceptable.
 const DatabaseConfig defaultDatabaseConfig = DatabaseConfig(
-  host: '127.0.0.1',
+  host: '127.0.2.2',
   port: 3306,
   user: 'root',
   password: 'ingenieroDEV14',
   databaseName: 'lpaecommerce',
-  directConnectionEnabled: false,
+  directConnectionEnabled: true,
 );
+
+const _dbHost = String.fromEnvironment('DB_HOST', defaultValue: '127.0.2.2');
